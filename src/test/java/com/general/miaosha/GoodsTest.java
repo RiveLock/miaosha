@@ -21,8 +21,6 @@ import java.time.LocalDateTime;
  * GoodsTest
  * @description
  * @author jixinshi
- * @date 2021/3/5 3:48 PM
- * @version 2.11.2
  */
 @SpringBootTest
 public class GoodsTest {
@@ -37,6 +35,7 @@ public class GoodsTest {
         goods.setPrice(new BigDecimal(2000));
         goods.setStockCount(100);
         goods.setSaleCount(0);
+        goods.setVersion(0);
         goods.setCreateTime(LocalDateTime.now());
 
         goodsService.save(goods);
@@ -52,4 +51,5 @@ public class GoodsTest {
     public void orderTest() {
         goodsService.order(new OrderDTO().setGoodsId(1));
     }
+
 }

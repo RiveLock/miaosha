@@ -1,11 +1,13 @@
 package com.general.miaosha.business.goods.entity;
 
-import java.math.BigDecimal;
+import com.baomidou.mybatisplus.annotation.Version;
 import com.general.miaosha.common.pojo.BaseEntity;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -33,5 +35,8 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "销售数量")
     private Integer saleCount;
 
+    @ApiModelProperty(value = "版本号，用于乐观锁")
+    @Version
+    private Integer version;
 
 }
