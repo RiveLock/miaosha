@@ -7,7 +7,10 @@
  */
 package com.general.miaosha.common.pojo;
 
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
+import nonapi.io.github.classgraph.json.Id;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -22,7 +25,8 @@ import java.time.LocalDateTime;
 @Data
 public class BaseEntity implements Serializable {
 
-    private String id;
+    @TableId(type = IdType.AUTO)
+    private Integer id;
 
     private LocalDateTime createTime;
 

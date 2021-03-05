@@ -8,7 +8,7 @@ import lombok.EqualsAndHashCode;
 
 /**
  * <p>
- * 订单表
+ * 商品订单表
  * </p>
  *
  * @author John J
@@ -16,8 +16,8 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-@ApiModel(value = "Order对象", description = "订单表")
-public class Order extends BaseEntity {
+@ApiModel(value = "GoodsOrder对象", description = "商品订单表")
+public class GoodsOrder extends BaseEntity {
 
 
     @ApiModelProperty(value = "商品id")

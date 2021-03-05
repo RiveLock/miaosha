@@ -12,7 +12,7 @@ create table goods
 )
     comment '商品表';
 
-create table `order`
+create table goods_order
 (
     id int auto_increment,
     goods_id int null comment '商品id',
@@ -21,5 +21,5 @@ create table `order`
     constraint order_pk
         primary key (id)
 )
-    comment '订单表';
+    comment '商品订单表';
 
