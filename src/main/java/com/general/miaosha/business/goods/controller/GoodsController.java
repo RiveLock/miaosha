@@ -1,17 +1,12 @@
 package com.general.miaosha.business.goods.controller;
 
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.general.miaosha.business.goods.entity.Goods;
 import com.general.miaosha.business.goods.entity.dto.OrderDTO;
 import com.general.miaosha.business.goods.service.GoodsService;
-import com.general.miaosha.business.sample.entity.User;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import org.springframework.stereotype.Controller;
 
 import java.util.List;
 
@@ -24,7 +19,7 @@ import java.util.List;
  * @since 2021-03-05
  */
 @RestController
-@RequestMapping("/goods/")
+@RequestMapping("/goods")
 public class GoodsController {
 
     @Autowired

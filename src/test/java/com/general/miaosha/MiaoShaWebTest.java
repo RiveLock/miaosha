@@ -15,25 +15,36 @@ import com.general.miaosha.business.order.entity.GoodsOrder;
 import com.general.miaosha.business.order.service.GoodsOrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.concurrent.CountDownLatch;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
  * MiaoShaTest
  * @author jixinshi
  */
 @SpringBootTest
-public class MiaoShaTest {
+@AutoConfigureMockMvc
+public class MiaoShaWebTest {
 
     @Autowired
     private GoodsService goodsService;
 
     @Autowired
     private GoodsOrderService goodsOrderService;
+
+    @Autowired
+    private MockMvc mockMvc;
 
     private final int STOCK_COUNT = 100;
 
@@ -67,7 +78,12 @@ public class MiaoShaTest {
         CountDownLatch countDownLatch = new CountDownLatch(THREAD_COUNT);
         for (int i = 1; i <= THREAD_COUNT; i++) {
             new Thread(() -> {
-                goodsService.order(new OrderDTO().setGoodsId(1));
+                try {
+                    this.mockMvc.perform(post("/goods/order", new OrderDTO().setGoodsId(1)).contentType(MediaType.APPLICATION_JSON))
+                            .andDo(print()).andExpect(status().isOk());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 countDownLatch.countDown();
             }).start();
 
@@ -84,4 +100,20 @@ public class MiaoShaTest {
         assertThat(STOCK_COUNT).isGreaterThanOrEqualTo(orderCount);
 
     }
+
+    @Test
+    public void testWeb() throws Exception {
+        OrderDTO dto = new OrderDTO().setGoodsId(1);
+        goodsService.order(dto);
+
+
+//        this.mockMvc.perform(post("/goods/order").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(dto).getBytes()));
+//        this.mockMvc.perform(post("/goods/order").contentType(MediaType.APPLICATION_JSON).content(JSON.toJSONString(dto))).andDo(print())
+//                .andExpect(status().isOk());
+    }
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+
 }
