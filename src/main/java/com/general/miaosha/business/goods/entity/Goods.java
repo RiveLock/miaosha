@@ -29,8 +29,8 @@ public class Goods extends BaseEntity {
     @ApiModelProperty(value = "价格")
     private BigDecimal price;
 
-    @ApiModelProperty(value = "库存数量")
-    private Integer stockCount;
+    @ApiModelProperty(value = "总数量")
+    private Integer allCount;
 
     @ApiModelProperty(value = "销售数量")
     private Integer saleCount;

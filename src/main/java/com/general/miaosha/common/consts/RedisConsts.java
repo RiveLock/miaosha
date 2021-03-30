@@ -16,9 +16,7 @@ public final class RedisConsts {
 
     private RedisConsts() {}
 
-    public static final String GOOD_STOCK = "GOOD:STOCK:";
-    public static final String GOOD_SALE = "GOOD:SALE:";
-    public static final String GOOD_VERSION = "GOOD:VERSION:";
+    public static final String GOOD_STOCK_COUNT = "GOOD:STOCK-COUNT:";
 
     /**
      * 公共 TTL

@@ -31,10 +31,30 @@ public class GoodsController {
         return ResponseEntity.ok(goodsService.list());
     }
 
+    /**
+     * 获得库存数量
+     * @param id
+     * @return
+     */
+    @GetMapping("/stock-count/{id}")
+    public ResponseEntity<Integer> stockCount(@PathVariable Integer id) {
+        Integer count = goodsService.stockCount(id);
+        return ResponseEntity.ok(count);
+    }
+
+    /**
+     * 下订单
+     * @param dto
+     * @return
+     */
     @PostMapping("/order")
     public ResponseEntity<Boolean> order(@RequestBody OrderDTO dto) {
-        goodsService.order(dto);
+        boolean success = goodsService.order(dto);
+        if (success) {
+            goodsService.clearStockCache(dto.getGoodsId());
+        }
         return ResponseEntity.ok(true);
     }
+
 
 }

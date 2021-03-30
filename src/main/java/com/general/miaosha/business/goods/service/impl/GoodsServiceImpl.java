@@ -13,13 +13,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 /**
  * <p>
@@ -39,51 +36,55 @@ public class GoodsServiceImpl extends ServiceImpl<GoodsMapper, Goods> implements
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
-    @Transactional(rollbackFor = Exception.class, isolation = Isolation.REPEATABLE_READ)
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void order(OrderDTO dto) {
+    public boolean order(OrderDTO dto) {
         // 检查库存
-
-        //  使用缓存
-        String sale = stringRedisTemplate.opsForValue().get(RedisConsts.GOOD_SALE + dto.getGoodsId());
-        String stock = stringRedisTemplate.opsForValue().get(RedisConsts.GOOD_STOCK + dto.getGoodsId());
-        String version = stringRedisTemplate.opsForValue().get(RedisConsts.GOOD_VERSION + dto.getGoodsId());
-        if (!(StringUtils.isNotBlank(sale) && StringUtils.isBlank(stock) && StringUtils.isBlank(version))) {
-            Goods goods = this.getById(dto.getGoodsId());
-            Assert.notNull(goods, "商品不存在");
-
-            sale = String.valueOf(goods.getSaleCount());
-            stock = String.valueOf(goods.getStockCount());
-            version = String.valueOf(goods.getVersion());
-        }
-
-        if (Objects.equals(sale, stock)) {
+        int stockCount = this.stockCount(dto.getGoodsId());
+        if (stockCount <= 0) {
             log.error("库存已售完");
-            //            throw new IllegalArgumentException("库存已售完");
-            return;
+            return false;
         }
 
-
-        Goods updateGoods = new Goods();
-        updateGoods.setId(dto.getGoodsId());
-        updateGoods.setSaleCount(Integer.valueOf(sale) + 1);
-        updateGoods.setVersion(Integer.valueOf(version));
-        updateGoods.setUpdateTime(LocalDateTime.now());
-        if (!this.updateById(updateGoods)) {
-            //            log.error("版本号未更新, Old: [{}], New[{}]", oldVersion, goods.getVersion());
-            return;
+        Goods goods = this.getById(dto.getGoodsId());
+        goods.setSaleCount(goods.getSaleCount()+ 1);
+        goods.setUpdateTime(LocalDateTime.now());
+        if (!this.updateById(goods)) {
+            return false;
         }
-
-        //        log.info("版本号更新成功, Old: [{}], New[{}]", oldVersion, goods.getVersion());
-
-        stringRedisTemplate.opsForValue().set(RedisConsts.GOOD_STOCK + dto.getGoodsId(), stock, Duration.ofMillis(RedisConsts.COMMON_TTL));
-        stringRedisTemplate.opsForValue().set(RedisConsts.GOOD_SALE + dto.getGoodsId(), String.valueOf(updateGoods.getSaleCount()), Duration.ofMillis(RedisConsts.COMMON_TTL));
-        stringRedisTemplate.opsForValue().set(RedisConsts.GOOD_VERSION + dto.getGoodsId(), String.valueOf(updateGoods.getVersion()), Duration.ofMillis(RedisConsts.COMMON_TTL));
 
         // 生成订单
         GoodsOrder order = new GoodsOrder();
         order.setGoodsId(dto.getGoodsId());
         order.setCreateTime(LocalDateTime.now());
         goodsOrderService.save(order);
+        return true;
+    }
+
+    @Override
+    public Integer stockCount(Integer id) {
+        String stockCount = stringRedisTemplate.opsForValue().get(RedisConsts.GOOD_STOCK_COUNT + id);
+        if (StringUtils.isNotBlank(stockCount)) {
+            return Integer.valueOf(stockCount);
+        }
+        int count = getStockCount(id);
+        stringRedisTemplate.opsForValue().set(RedisConsts.GOOD_STOCK_COUNT + id, String.valueOf(count), RedisConsts.COMMON_TTL);
+        return count;
+    }
+
+    /**
+     * 获得库存数量
+     * @param id
+     * @return
+     */
+    private int getStockCount(Integer id) {
+        Goods goods = this.getById(id);
+        Assert.notNull(goods, "商品不存在");
+        return goods.getAllCount() - goods.getSaleCount();
+    }
+
+    @Override
+    public void clearStockCache(Integer goodsId) {
+        stringRedisTemplate.delete(RedisConsts.GOOD_STOCK_COUNT + goodsId);
     }
 }

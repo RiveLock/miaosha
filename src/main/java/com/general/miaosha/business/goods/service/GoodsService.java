@@ -14,5 +14,14 @@ import com.general.miaosha.business.goods.entity.dto.OrderDTO;
  */
 public interface GoodsService extends IService<Goods> {
 
-    void order(OrderDTO dto);
+    boolean order(OrderDTO dto);
+
+    Integer stockCount(Integer id);
+
+    /**
+     * 清除库存缓存
+     * @param goodsId
+     */
+    void clearStockCache(Integer goodsId);
+
 }
